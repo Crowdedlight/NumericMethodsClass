@@ -1,0 +1,4 @@
+﻿  Source.cpp
+c:\users\frede\documents\github\numericmethodsclass\lektion2\lektion2\utilities.h(55): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  lektion2.vcxproj -> C:\Users\frede\Documents\Github\NumericMethodsClass\lektion2\Debug\lektion2.exe
+  lektion2.vcxproj -> C:\Users\frede\Documents\Github\NumericMethodsClass\lektion2\Debug\lektion2.pdb (Full PDB)
