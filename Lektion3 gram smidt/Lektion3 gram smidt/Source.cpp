@@ -1,4 +1,5 @@
 #include <iostream>
+#include "nr3.h"
 #include "GramSchmidt.h"
 using namespace std;
 

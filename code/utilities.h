@@ -58,7 +58,7 @@ namespace util
 			for (int j = 0; j < m; j++)
 				M[i][j] = 0;
 
-		for (int i = 0; i < m; i++)
+		for (int i = 0; i < m; i++)	
 			M[i][i] = V[i];
 
 		return M;
