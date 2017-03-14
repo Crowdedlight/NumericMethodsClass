@@ -9,9 +9,10 @@ using namespace std;
 class GramSchmidt
 {
 public:
-    GramSchmidt();    
+	//tester
+    GramSchmidt();    //Tester tester
     
-    vector<VecDoub> calculate(vector<VecDoub> input);
+    vector<VecDoub> calculate(vector<VecDoub> input); 
     void print();
     ~GramSchmidt();
 
