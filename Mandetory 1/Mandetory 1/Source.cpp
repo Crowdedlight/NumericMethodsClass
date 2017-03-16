@@ -2,12 +2,16 @@
 #include "nr3.h"
 #include "utilities.h"
 #include "svd.h"
+#include <math.h>
+#include <vector>
 
 using namespace std;
 using namespace util;
 
+#define PI 3.14159265
+
 #pragma region decleareFunc
-    double varians(int j, SVD& svd);
+    vector<double> varians(SVD& svd);
 #pragma endregion
 
 int main()
@@ -24,7 +28,7 @@ int main()
 
 	ifstream d1("d1");
     ifstream d2("d2");
-	for (int i = 0; i < 2*N; i++)
+	for (int i = 0; i < 2*N; i+= 2)
 	{
 		double theta_1, theta_2, x, y;
 
@@ -34,22 +38,24 @@ int main()
 		d1 >> x;
 		d1 >> y;
 
-		if (!(i % 2))
-		{
-			A[i][0] = 1;
-			A[i][1] = 0;
-			A[i][2] = 1 * cos(theta_1);
-			A[i][3] = 1 * cos(theta_1 + theta_2);
-			z[i] = x;
-		}
-		else
-		{
-			A[i][0] = 0;
-			A[i][1] = 1;
-			A[i][2] = 1 * sin(theta_1);
-			A[i][3] = 1 * sin(theta_1 + theta_2);
-			z[i] = y;
-		}
+        //x part
+        A[i][0] = 1;
+        A[i][1] = 0;
+        A[i][2] = 1 * cos(theta_1);
+        A[i][3] = 1 * cos(theta_1 + theta_2);
+        z[i] = x;
+
+        //y part
+        A[i+1][0] = 0;
+        A[i+1][1] = 1;
+        A[i+1][2] = 1 * sin(theta_1);
+        A[i+1][3] = 1 * sin(theta_1 + theta_2);
+        z[i+1] = y;
+	}
+
+    for (int i = 0; i < 2*N; i+=2)
+    {
+        double theta_1, theta_2, x, y;
 
         //dataset 2
         d2 >> theta_1;
@@ -57,24 +63,20 @@ int main()
         d2 >> x;
         d2 >> y;
 
-        if (!(i % 2))
-        {
-            A2[i][0] = 1;
-            A2[i][1] = 0;
-            A2[i][2] = 1 * cos(theta_1);
-            A2[i][3] = 1 * cos(theta_1 + theta_2);
-            z2[i] = x;
-        }
-        else
-        {
-            A2[i][0] = 0;
-            A2[i][1] = 1;
-            A2[i][2] = 1 * sin(theta_1);
-            A2[i][3] = 1 * sin(theta_1 + theta_2);
-            z2[i] = y;
-        }
-		//cout << A[i][0] << "," << A[i][1] << "," << A[i][2] << "," << A[i][3] << endl;
-	}
+        //x part
+        A2[i][0] = 1;
+        A2[i][1] = 0;
+        A2[i][2] = 1 * cos(theta_1);
+        A2[i][3] = 1 * cos(theta_1 + theta_2);
+        z2[i] = x;
+
+        //y part
+        A2[i+1][0] = 0;
+        A2[i+1][1] = 1;
+        A2[i+1][2] = 1 * sin(theta_1);
+        A2[i+1][3] = 1 * sin(theta_1 + theta_2);
+        z2[i+1] = y;
+    }
 
 #pragma endregion 
 
@@ -83,8 +85,25 @@ int main()
 	SVD svd1(A);
     SVD svd2(A2);
 
-    //svd1.w.print();
+    cout << "V dataset 1:" << endl;
+    cout << "------------------------------------------------------" << endl;
+    svd1.v.print();
+    cout << endl << endl;
 
+    cout << "W dataset 1:" << endl;
+    cout << "------------------------------------------------------" << endl;
+    diag(svd1.w).print();
+    cout << endl << endl;
+
+    cout << "V dataset 2:" << endl;
+    cout << "------------------------------------------------------" << endl;
+    svd2.v.print();
+    cout << endl << endl;
+
+    cout << "W dataset 2:" << endl;
+    cout << "------------------------------------------------------" << endl;
+    diag(svd2.w).print();
+    cout << endl << endl;
 
 	//Psudoinverse as we have more equations than unknowns
 	MatDoub w1 = diag(svd1.w);
@@ -98,15 +117,6 @@ int main()
 	auto x_1 = svd1.v * w1 * svd1.u.transpose() * z;
     auto x_2 = svd2.v * w2 * svd2.u.transpose() * z2;
 
-    //cout << "-------------------------------" << endl;
-    //cout << "-------- Paremeters d1 --------" << endl;
-    //cout << "-------------------------------" << endl;
-	//x_1.print();
-    //cout << "-------------------------------" << endl;
-    //cout << "-------- Paremeters d2 --------" << endl;
-    //cout << "-------------------------------" << endl;
-    //x_2.print();
-
 #pragma endregion 
 
 #pragma region Residual Error
@@ -117,45 +127,19 @@ int main()
     //dataset 2
     auto rErr2 = (A2*x_2 - z2).length();
 
-
-    //cout << "-------------------------------" << endl;
-    //cout << "------ Residual error d1 ------" << endl;
-    //cout << "-------------------------------" << endl;
-    //cout << rErr << endl;
-    //
-    //cout << "-------------------------------" << endl;
-    //cout << "------ Residual error d2 ------" << endl;
-    //cout << "-------------------------------" << endl;
-    //cout << rErr2 << endl;
-
 #pragma endregion
 
 #pragma region Varians
 
     //dataset 1
-    auto sigma1_x = varians(0, svd1);
-    auto sigma1_y = varians(1, svd1);
-    auto sigma1_a = varians(2, svd1);
-    auto sigma1_b = varians(3, svd1);
+    auto sigma1 = varians(svd1);
+    //dataset 2
+    auto sigma2 = varians(svd2);
 
-    auto sigma2_x = varians(0, svd2);
-    auto sigma2_y = varians(1, svd2);
-    auto sigma2_a = varians(2, svd2);
-    auto sigma2_b = varians(3, svd2);
-
-    //cout << "-------------------------------" << endl;
-    //cout << "---------- Varians d1 ---------" << endl;
-    //cout << "-------------------------------" << endl;
-    //cout << sigma1_x << ", " << sigma1_y << ", " << sigma1_a << ", " << sigma1_b << endl;
-    //
-    //cout << "-------------------------------" << endl;
-    //cout << "---------- Varians d2 ---------" << endl;
-    //cout << "-------------------------------" << endl;
-    //cout << sigma2_x << ", " << sigma2_y << ", " << sigma2_a << ", " << sigma2_b << endl;
 
 #pragma endregion
 
-
+#pragma region printout
     cout << "Results for dataset 1:" << endl;
     cout << "------------------------------------------------------" << endl;
     cout << "q: ";    x_1.print();
@@ -164,7 +148,7 @@ int main()
     cout << endl;
     cout << "Singular Values: "; svd1.w.print();
     cout << endl;
-    cout << "Varians (x0,y0,a,b): " << sigma1_x << "    " << sigma1_y << "    " << sigma1_a << "    " << sigma1_b << endl;
+    cout << "Varians (x0,y0,a,b): " << sigma1[0] << "    " << sigma1[1] << "    " << sigma1[2] << "    " << sigma1[3] << endl;
     cout << endl << endl;
 
     cout << "Results for dataset 2:" << endl;
@@ -175,9 +159,10 @@ int main()
     cout << endl;
     cout << "Singular Values: "; svd2.w.print();
     cout << endl;
-    cout << "Varians (x0,y0,a,b): " << sigma2_x << "    " << sigma2_y << "    " << sigma2_a << "    " << sigma2_b << endl;
+    cout << "Varians (x0,y0,a,b): " << sigma2[0] << "    " << sigma2[1] << "    " << sigma2[2] << "    " << sigma2[3] << endl;
     cout << endl << endl;
 
+#pragma endregion
 
     cout << endl << endl;
 	system("pause");
@@ -185,14 +170,19 @@ int main()
 }
 
 
-double varians(int j, SVD& svd)
+vector<double> varians(SVD& svd)
 {
+    vector<double> Res;
     double tempRes = 0;
 
-    for (int i = 0; i < svd.w.size(); i++)
-    {
-        tempRes += pow((svd.v[j][i] / svd.w[i]), 2);
+    for (int j = 0; j < svd.w.size(); j++)
+    {        
+        tempRes = 0;
+        for (int i = 0; i < svd.v.nrows(); i++)
+        {
+            tempRes += pow((svd.v[i][j] / svd.w[i]), 2);
+        }
+        Res.push_back(tempRes);
     }
-
-    return tempRes;
+    return Res;
 }
