@@ -6,6 +6,10 @@
 using namespace std;
 using namespace util;
 
+#pragma region decleareFunc
+    double varians(int j, SVD& svd);
+#pragma endregion
+
 int main()
 {
 	
@@ -79,6 +83,8 @@ int main()
 	SVD svd1(A);
     SVD svd2(A2);
 
+    //svd1.w.print();
+
 
 	//Psudoinverse as we have more equations than unknowns
 	MatDoub w1 = diag(svd1.w);
@@ -92,18 +98,101 @@ int main()
 	auto x_1 = svd1.v * w1 * svd1.u.transpose() * z;
     auto x_2 = svd2.v * w2 * svd2.u.transpose() * z2;
 
-    cout << "-------------------------------" << endl;
-    cout << "-------- Paremeters d1 --------" << endl;
-    cout << "-------------------------------" << endl;
-	x_1.print();
-    cout << "-------------------------------" << endl;
-    cout << "-------- Paremeters d2 --------" << endl;
-    cout << "-------------------------------" << endl;
-    x_2.print();
+    //cout << "-------------------------------" << endl;
+    //cout << "-------- Paremeters d1 --------" << endl;
+    //cout << "-------------------------------" << endl;
+	//x_1.print();
+    //cout << "-------------------------------" << endl;
+    //cout << "-------- Paremeters d2 --------" << endl;
+    //cout << "-------------------------------" << endl;
+    //x_2.print();
 
 #pragma endregion 
+
+#pragma region Residual Error
+    //calculate residual error ||aq-z||
+
+    //dataset 1
+    auto rErr = (A*x_1 - z).length();
+    //dataset 2
+    auto rErr2 = (A2*x_2 - z2).length();
+
+
+    //cout << "-------------------------------" << endl;
+    //cout << "------ Residual error d1 ------" << endl;
+    //cout << "-------------------------------" << endl;
+    //cout << rErr << endl;
+    //
+    //cout << "-------------------------------" << endl;
+    //cout << "------ Residual error d2 ------" << endl;
+    //cout << "-------------------------------" << endl;
+    //cout << rErr2 << endl;
+
+#pragma endregion
+
+#pragma region Varians
+
+    //dataset 1
+    auto sigma1_x = varians(0, svd1);
+    auto sigma1_y = varians(1, svd1);
+    auto sigma1_a = varians(2, svd1);
+    auto sigma1_b = varians(3, svd1);
+
+    auto sigma2_x = varians(0, svd2);
+    auto sigma2_y = varians(1, svd2);
+    auto sigma2_a = varians(2, svd2);
+    auto sigma2_b = varians(3, svd2);
+
+    //cout << "-------------------------------" << endl;
+    //cout << "---------- Varians d1 ---------" << endl;
+    //cout << "-------------------------------" << endl;
+    //cout << sigma1_x << ", " << sigma1_y << ", " << sigma1_a << ", " << sigma1_b << endl;
+    //
+    //cout << "-------------------------------" << endl;
+    //cout << "---------- Varians d2 ---------" << endl;
+    //cout << "-------------------------------" << endl;
+    //cout << sigma2_x << ", " << sigma2_y << ", " << sigma2_a << ", " << sigma2_b << endl;
+
+#pragma endregion
+
+
+    cout << "Results for dataset 1:" << endl;
+    cout << "------------------------------------------------------" << endl;
+    cout << "q: ";    x_1.print();
+    cout << endl;
+    cout << "Residul Error: " << rErr << endl;
+    cout << endl;
+    cout << "Singular Values: "; svd1.w.print();
+    cout << endl;
+    cout << "Varians (x0,y0,a,b): " << sigma1_x << "    " << sigma1_y << "    " << sigma1_a << "    " << sigma1_b << endl;
+    cout << endl << endl;
+
+    cout << "Results for dataset 2:" << endl;
+    cout << "------------------------------------------------------" << endl;
+    cout << "q: ";    x_2.print();
+    cout << endl;
+    cout << "Residul Error: " << rErr2 << endl;
+    cout << endl;
+    cout << "Singular Values: "; svd2.w.print();
+    cout << endl;
+    cout << "Varians (x0,y0,a,b): " << sigma2_x << "    " << sigma2_y << "    " << sigma2_a << "    " << sigma2_b << endl;
+    cout << endl << endl;
+
 
     cout << endl << endl;
 	system("pause");
 	return 0;
+}
+
+
+double varians(int j, SVD& svd)
+{
+    double tempRes = 0;
+
+    for (int i = 0; i < svd.w.size(); i++)
+    {
+        tempRes += pow((svd.v[j][i] / svd.w[i]), 2);
+    }
+
+    return tempRes;
 }
