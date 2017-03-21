@@ -54,6 +54,7 @@ int main()
 
 
 	//Psudoinverse as we have more equations than unknowns
+	printMatrix(svd.w);
 	MatDoub w1 = diag(svd.w);
 	for (int i = 0; i < w1.nrows(); i++)
 	{
@@ -62,7 +63,7 @@ int main()
 
 	auto x_1 = svd.v * w1 * svd.u.transpose() * z;
 
-	x_1.print();
+	//x_1.print();
 
 #pragma endregion 
 
