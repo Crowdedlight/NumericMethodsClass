@@ -93,7 +93,7 @@ Doub rtbis(T &func, const Doub x1, const Doub x2, const Doub xacc) {
 		//Table values
 		indexes.push_back(j);
 		//X_k
-		xk.push_back(rtb);
+		xk.push_back(xmid);
 		//D_k
 		if (j == 0) dk.push_back(0);
 		else dk.push_back(xk[j] - xk[j - 1]);
@@ -104,7 +104,7 @@ Doub rtbis(T &func, const Doub x1, const Doub x2, const Doub xacc) {
         }
         else
         {
-            Doub cCal = (xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]);
+            Doub cCal = abs((xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]));
             c.push_back((cCal));
         }
 
@@ -169,7 +169,7 @@ Doub rtflsp(T &func, const Doub x1, const Doub x2, const Doub xacc) {
         }
         else
         {
-            Doub cCal = (xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]);
+            Doub cCal = abs((xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]));
             c.push_back((cCal));
         }
 
