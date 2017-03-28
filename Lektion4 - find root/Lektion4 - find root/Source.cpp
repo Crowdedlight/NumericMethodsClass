@@ -104,7 +104,7 @@ Doub rtbis(T &func, const Doub x1, const Doub x2, const Doub xacc) {
         }
         else
         {
-            Doub cCal = (xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]);
+            Doub cCal = abs((xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]));
             c.push_back((cCal));
         }
 
@@ -169,7 +169,7 @@ Doub rtflsp(T &func, const Doub x1, const Doub x2, const Doub xacc) {
         }
         else
         {
-            Doub cCal = (xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]);
+            Doub cCal = abs((xk[j] - xk[j - 1]) / (xk[j - 1] - xk[j - 2]));
             c.push_back((cCal));
         }
 
