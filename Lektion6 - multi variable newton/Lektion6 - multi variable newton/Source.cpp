@@ -20,14 +20,14 @@ int iter = 0;
 VecDoub vecFunc(VecDoub_I x)
 {
 	VecDoub f(8);
-	f[0] = x[6] * cosh(x[4] / x[6]) - 1 - x[2];			// L0
-	f[1] = 2 * x[6] * sinh(x[4] / x[6]) - x[1];			// L 
-	f[2] = 2 * x[4] + 2 * k * cos(x[5]) - d;			// p
-	f[3] = x[2] + k * sin(x[5]) - n[iter];				// phi
-	f[4] = sinh(x[4] / x[6]) - tan(x[3]);				// x
-	f[5] = (1 + (v/(w * x[0]))) * tan(x[3]) - tan(x[5]);// theta
-	f[6] = x[0] * (1 + alpha * x[7]) - x[1];			// a
-	f[7] = (w * x[0])/(2 * sin(x[3])) - x[7];			// h
+	f[0] = x[6] * (cosh(x[4] / x[6]) - 1) - x[2];			// L0
+	f[1] = 2 * x[6] * sinh(x[4] / x[6]) - x[1];				// L 
+	f[2] = 2 * x[4] + 2 * k * cos(x[5]) - d;				// p
+	f[3] = x[2] + k * sin(x[5]) - n[iter];					// phi
+	f[4] = sinh(x[4] / x[6]) - tan(x[3]);					// x
+	f[5] = (1 + (v / (w * x[0]))) * tan(x[3]) - tan(x[5]);	// theta
+	f[6] = x[0] * (1 + alpha * x[7]) - x[1];				// a
+	f[7] = (w * x[0])/(2 * sin(x[3])) - x[7];				// h
 
 	return f;
 };
@@ -88,10 +88,7 @@ int main()
 
 #pragma region setup vectors
 	
-	//d guess 1
-	d = 30;
-
-	//Start Guess
+	//guess variables
 	VecDoub_IO x(8);
 	bool check = false;
 
@@ -102,23 +99,27 @@ int main()
 	//x[4] = 15;		// x
 	//x[5] = 3.14/3;	// theta
 	//x[6] = 40;		// a
-	//x[7] = 5;		// h
+	//x[7] = 5;			// h
 
 #pragma endregion
 
 	vector<string> headers = { "L0", "L", "p", "phi", "x", "theta", "a", "h" };
 
+	//d guess 1
+	d = 30;
+
 	for(iter = 0; iter < n.size(); iter++)
 	{
+
         //set startguess
-        x[0] = 30;		// L0
-        x[1] = 30;		// L 
-        x[2] = 0.1;		// p
-        x[3] = 3.14 / 6;// phi
-        x[4] = 15;		// x
-        x[5] = 3.14 / 3;// theta
-        x[6] = 40;		// a
-        x[7] = 5;		// h
+		x[0] = 30;			// L0
+        x[1] = 30;			// L 
+        x[2] = 0.1;			// p
+		x[3] = 3.14 / 20;	// phi
+        x[4] = 15;			// x
+		x[5] = 3.14 / 5;	// theta
+        x[6] = 40;			// a
+        x[7] = 5;			// h
 
         cout << "n : " << n[iter] << endl;
 		newt(x, check, vecFunc);
