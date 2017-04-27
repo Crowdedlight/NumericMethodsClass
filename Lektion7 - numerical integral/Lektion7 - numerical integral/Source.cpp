@@ -10,7 +10,7 @@ using namespace util;
 template<class T>
 Doub midpoint(T &func, Doub a, Doub b, Doub acc);
 template<class T>
-Doub trapez(T &func, Doub a, Doub b, int N);
+Doub trapez(T &func, Doub a, Doub b, Doub acc);
 template<class T>
 Doub simpson(T &func, Doub a, Doub b, int N);
 
@@ -80,15 +80,15 @@ void printTable(vector<vector<Doub>> colums, vector<string> headers)
 
 int main()
 {
-	Doub acc = pow(10, -8);
+	Doub acc = pow(10, -15);
 
 	func_one f1;
 	func_two f2;
 	func_three f3;
 	func_four f4;
 
-	Doub mid1 = midpoint(f1, 0, 1, acc);
-	//Doub trap1 = trapez(f1, 0, 1, 100);
+	//Doub mid1 = midpoint(f1, 0, 1, acc);
+	Doub trap1 = trapez(f1, 0, 1, acc);
 	//Doub simpson1 = simpson(f1, 0, 1, 100);
 
 
@@ -175,20 +175,85 @@ Doub midpoint(T &func, Doub a, Doub b, Doub acc)
 }
 
 template<class T>
-Doub trapez(T &func, Doub a, Doub b, int N)
+Doub trapez(T &func, Doub a, Doub b, Doub acc)
 {
-	Doub h = (b - a) / N;
+	Doub N = 1;
+	Doub h = 0;
 	Doub sum = 0;
-	Doub res = 0;
+	Doub res;
+	Doub lastRes = 0;
+	Doub iter = 0;
 
-	//sum
-	for (int i = 1; i < N; i++)
-		sum += func(a+i*h);
+	vector<double> vIter;
+	vector<double> vRes;
+	vector<double> vAlphaK;
+	vector<double> vErr;
+	vector<double> vAr;
+	vector<string> vHeader = { "n", "Result", "alphaK", "Err", "Ar" };
 
-	//calculate rest
-	res = h * (0.5*func(a) + 0.5*func(b) + sum);
+	while (true)
+	{
+		//calculate h
+		h = (b - a) / N;
 
-	return res;
+		//sum
+		for (int i = 1; i < N; i++)
+			sum += func(a + i*h);
+
+		//calculate rest
+		res = h * (0.5*func(a) + 0.5*func(b) + sum);
+
+		//Save values
+		vIter.push_back(N);
+		vRes.push_back(res);
+
+		Doub alphaK, error;
+		if(iter > 1)
+		{
+			alphaK = (vRes[iter - 2] - vRes[iter - 1]) / (vRes[iter - 1]- vRes[iter]);
+			error = abs((alphaK*vRes[iter] - vRes[iter - 1]) / (alphaK - 1) - vRes[iter]);
+		}
+		else
+		{
+			alphaK = 0;
+			error = 0;
+		}
+
+		vAlphaK.push_back(alphaK);
+		vErr.push_back(error);
+
+		//finish check
+		if (abs(lastRes - res) <= acc)
+		{
+			//Ricardson exterpolartion
+			int aK = round(vAlphaK.back());
+			vAr.push_back(0);
+			for (auto i = 1; i < vRes.size(); i++)
+			{
+				auto Ar = (aK * vRes[i] - vRes[i - 1]) / (aK - 1);
+				vAr.push_back(Ar);
+			}
+
+
+			vector<vector<Doub>> print;
+			print.push_back(vIter);
+			print.push_back(vRes);
+			print.push_back(vAlphaK);
+			print.push_back(vErr);
+			print.push_back(vAr);
+
+			printTable(print, vHeader);
+
+			return res;
+		}
+
+		//reset values for next iteration
+		lastRes = res;
+		sum = 0;
+		res = 0;
+		N = N * 2;
+		iter++;
+	}
 }
 
 template<class T>
