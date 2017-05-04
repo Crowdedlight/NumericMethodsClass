@@ -1,7 +1,6 @@
 #include "nr3.h"
 #include "utilities.h"
 #include <iostream>
-#include "roots_multidim.h"
 #include "stepper.h"
 #include "odeint.h"
 #include "stepperdopr853.h"
@@ -9,13 +8,14 @@
 #include "shootf.h"
 #include "ludcmp.h"
 #include "roots.h"
+#include "qrdcmp.h"
+#include "roots_multidim.h"
 
 using namespace std;
 using namespace util;
 
 struct rhs {
-	rhs() {}
-	void operator() (const Doub x, VecDoub &y, VecDoub_O &dydx) {
+	void operator() (const Doub x, VecDoub_I &y, VecDoub_O &dydx) {
 		dydx[0] = y[1];
 		dydx[1] = -cos(y[0]) * sin(y[1]);
 	}
@@ -23,7 +23,6 @@ struct rhs {
 
 struct load
 {
-	load() {}
 	VecDoub operator() (const Doub x, VecDoub_I &y)
 	{
 		VecDoub ystart(2);
@@ -53,6 +52,7 @@ int main()
 	rhs d;
 	score s(3);
 	VecDoub v(1);
+	v[0] = 0; //Need to init otherwise it gets init wrong
 	bool check = false;
 
 	Shoot<load, rhs, score> shoot(nvar, x1, x2, l, d, s);
