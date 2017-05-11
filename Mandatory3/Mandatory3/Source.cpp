@@ -78,33 +78,42 @@ void midpoint(T &func, Doub a, Doub b, Doub acc, VecDoub &yi)
 	VecDoub temp2(yi.size(), 0.0);
 
 	//insert initial Values in Res
-	for (int i = 0; i < yi.size(); i++)
-		res[i][iter] = yi[i];
+	//for (int i = 0; i < yi.size(); i++)
+	//	res[i][iter] = yi[i];
 
 	//repeat calcs until integral stabilizes
 	while (running)
 	{
 		h = (b - a) / N;
 
-		for (int i = 0; i <= N; i++)
+		for (int i = 0; i < N; i++)
 		{
 			func(yi, dxdy);
 			for (int j = 0; j < yi.size(); j++)
 				xmid[j] = yi[j] + 0.5 * dxdy[j] * h;
 
+            //clear dxdy
+            dxdy.resize(yi.size());
+
 			func(xmid, dxdy);
 			for (int j = 0; j < yi.size(); j++)
 			{
-				res[j][iter+1] = res[j][iter] + dxdy[j] * h;
-				yi[j] = res[j][iter + 1];
+				yi[j] = yi[j] + dxdy[j] * h;
+				//yi[j] = res[j][i + 1];
 			}
+
+            //clear dxdy
+            dxdy.resize(yi.size());
 		}
 
+        for (int i = 0; i < yi.size(); i++)
+            res[i][iter] = yi[i];
+
 		nV.push_back(N);
-		resultV1.push_back(res[0][iter]);
-		resultV2.push_back(res[1][iter]);
-		resultV3.push_back(res[2][iter]);
-		resultV4.push_back(res[3][iter]);
+		resultV1.push_back(yi[0]);
+		resultV2.push_back(yi[1]);
+		resultV3.push_back(yi[2]);
+		resultV4.push_back(yi[3]);
 
 		//print saving
 		Doub alphaK, error;
