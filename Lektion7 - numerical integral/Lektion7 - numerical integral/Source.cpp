@@ -87,8 +87,8 @@ int main()
 	func_three f3;
 	func_four f4;
 
-	//Doub mid1 = midpoint(f1, 0, 1, acc);
-	Doub trap1 = trapez(f1, 0, 1, acc);
+	Doub mid1 = midpoint(f1, 0, 1, acc);
+	//Doub trap1 = trapez(f1, 0, 1, acc);
 	//Doub simpson1 = simpson(f1, 0, 1, 100);
 
 

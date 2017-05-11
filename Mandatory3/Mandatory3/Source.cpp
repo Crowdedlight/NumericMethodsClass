@@ -7,6 +7,11 @@ using namespace std;
 using namespace util;
 
 
+#define D   0.001   // kg/m
+#define M   0.058   // kg
+#define G   9.81
+
+
 #pragma region Print functions
 void printTable(vector<vector<Doub>> colums, vector<string> headers)
 {
@@ -46,47 +51,77 @@ void printTable(vector<vector<Doub>> colums, vector<string> headers)
 
 
 template<class T>
-Doub midpoint(T &func, Doub a, Doub b, Doub acc)
+void midpoint(T &func, Doub a, Doub b, Doub acc, VecDoub &yi)
 {
 	//vector for print
 	vector<Doub> indexV;
 	vector<Doub> nV;
-	vector<Doub> resultV;
+	vector<Doub> resultV1;
+	vector<Doub> resultV2;
+	vector<Doub> resultV3;
+	vector<Doub> resultV4;
 	vector<Doub> alphaKV;
 	vector<Doub> errorV;
-	vector<string> headers = { "N" , "Result", "AlphaK", "Error" };
+	vector<string> headers = { "N" , "x1'", "x2'", "y1'", "y2'", "AlphaK", "Error" };
 
 	bool running = true;
-	Doub N = 1;
+	Doub N = 2;
+	VecDoub initialConditions = yi;
+	
 	Doub lastErr = 0;
-	Doub res = 0;
+	VecDoub xmid(yi.size());
+	VecDoub dxdy(yi.size());
 	int iter = 0;
 	Doub h;
+	MatDoub res(yi.size(), 20, 0.0);
+	VecDoub temp(yi.size(), 0.0);
+	VecDoub temp2(yi.size(), 0.0);
+
+	//insert initial Values in Res
+	for (int i = 0; i < yi.size(); i++)
+		res[i][iter] = yi[i];
 
 	//repeat calcs until integral stabilizes
 	while (running)
 	{
 		h = (b - a) / N;
-		res = 0;
-		for (int i = 1; i <= N; i++)
+
+		for (int i = 0; i <= N; i++)
 		{
-			//sum of f(xi-1/2)
-			Doub xi = (a + i*h) - (0.5*h);
-			res += func(xi);
+			func(yi, dxdy);
+			for (int j = 0; j < yi.size(); j++)
+				xmid[j] = yi[j] + 0.5 * dxdy[j] * h;
+
+			func(xmid, dxdy);
+			for (int j = 0; j < yi.size(); j++)
+			{
+				res[j][iter+1] = res[j][iter] + dxdy[j] * h;
+				yi[j] = res[j][iter + 1];
+			}
 		}
 
-		//final res
-		res = res*h;
-
 		nV.push_back(N);
-		resultV.push_back(res);
+		resultV1.push_back(res[0][iter]);
+		resultV2.push_back(res[1][iter]);
+		resultV3.push_back(res[2][iter]);
+		resultV4.push_back(res[3][iter]);
 
 		//print saving
 		Doub alphaK, error;
 		if (iter > 1)
 		{
-			alphaK = (resultV[iter - 2] - resultV[iter - 1]) / (resultV[iter - 1] - resultV[iter]);
-			error = abs((alphaK*resultV[iter] - resultV[iter - 1]) / (alphaK - 1) - resultV[iter]);
+			for (int i = 0; i < temp.size(); i++)
+			{
+				temp[i] = res[i][iter - 2] - res[i][iter - 1];
+				temp2[i] = res[i][iter - 1] - res[i][iter];
+			}
+			alphaK = temp.length() / temp2.length();
+			//order will always be 2 if midpoint is implemented correct, so alphaK = 4
+			for (int i = 0; i < temp.size(); i++)
+			{
+				temp[i] = abs(res[i][iter] - res[i][iter-1]);
+			}
+			error = (temp.length()) / static_cast<Doub>(4 - 1);
 		}
 		else
 		{
@@ -98,33 +133,53 @@ Doub midpoint(T &func, Doub a, Doub b, Doub acc)
 		errorV.push_back(error);
 
 		//finish check
-		if (abs(lastErr - error) <= acc && iter > 1)
+		if (abs(lastErr - error) <= acc && iter > 2)
 		{
 			//print stuff
 			vector<vector<Doub>> printV;
 			printV.push_back(nV);
-			printV.push_back(resultV);
+			printV.push_back(resultV1);
+			printV.push_back(resultV2);
+			printV.push_back(resultV3);
+			printV.push_back(resultV4);
 			printV.push_back(alphaKV);
 			printV.push_back(errorV);
 			printTable(printV, headers);
-			return res;
+			return;
 		}
 
 		//reset values for next iteration
 		lastErr = error;
-		res = 0;
 		N = N * 2;
 		iter++;
+
+		//reset initial values
+		yi = initialConditions;
 	}
 }
 
-
+struct rhs {
+	void operator() (VecDoub_I &y, VecDoub_O &dydx) {
+		dydx[0] = y[1];
+		dydx[1] = -(D / M)*y[1] * sqrt(pow(y[1], 2) + pow(y[3], 2));
+		dydx[2] = y[3];
+		dydx[3] = -G - (D / M)*y[3] * sqrt(pow(y[1], 2) + pow(y[3], 2));
+	}
+};
 
 int main()
 {
 	
-	Doub acc = pow(1, -3);
-	
+	Doub acc = pow(10, -3);
+	rhs rhs;
+	VecDoub yi(4);
+	yi[0] = 0;
+	yi[1] = 1;
+	yi[2] = 0;
+	yi[3] = 3;
+	midpoint(rhs, 0.0, 1.0, acc, yi);
+
+	yi.print();
 
 
 
